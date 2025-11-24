@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Your Orders - {{ RESTAURANT_NAME }}{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-primary fw-bold">
+                {% if current_user.role in ['Admin', 'Staff'] %}
+                    <i class="fas fa-tasks me-2"></i>All Orders
+                {% else %}
+                    <i class="fas fa-receipt me-2"></i>My Orders
+                {% endif %}
+            </h2>
+            {% if current_user.role in ['Admin', 'Staff'] %}
+            <div class="btn-group">
+                <a href="{{ url_for('view_orders') }}?filter=all" class="btn btn-outline-primary {% if request.args.get('filter', 'all') == 'all' %}active{% endif %}">All</a>
+                <a href="{{ url_for('view_orders') }}?filter=Pending" class="btn btn-outline-primary {% if request.args.get('filter') == 'Pending' %}active{% endif %}">Pending</a>
+                <a href="{{ url_for('view_orders') }}?filter=Preparing" class="btn btn-outline-primary {% if request.args.get('filter') == 'Preparing' %}active{% endif %}">Preparing</a>
+                <a href="{{ url_for('view_orders') }}?filter=Completed" class="btn btn-outline-primary {% if request.args.get('filter') == 'Completed' %}active{% endif %}">Completed</a>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if orders %}
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    {% if current_user.role in ['Admin', 'Staff'] %}
+                                        <th>Customer</th>
+                                    {% endif %}
+                                    <th>Date</th>
+                                    <th>Total Amount</th>
+                                    <th>Status</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in orders %}
+                                    <tr>
+                                        <td>#{{ order.id }}</td>
+                                        {% if current_user.role in ['Admin', 'Staff'] %}
+                                            <td>{{ order.customer.username }}</td>
+                                        {% endif %}
+                                        <td>{{ order.order_date.strftime('%d %b %Y, %I:%M %p') }}</td>
+                                        <td>{{ format_currency(order.total_amount) }}</td>
+                                        <td>
+                                            <span class="badge status-{{ order.status.lower() }}">
+                                                {{ order.status }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#orderDetailsModal{{ order.id }}">
+                                                <i class="fas fa-eye me-1"></i>View
+                                            </button>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
+                <h4>No Orders Found</h4>
+                <p>You haven't placed any orders yet.</p>
+                <a href="{{ url_for('menu') }}" class="btn btn-primary">
+                    <i class="fas fa-utensils me-2"></i>Browse Menu
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Order Details Modals -->
+{% for order in orders %}
+<div class="modal fade" id="orderDetailsModal{{ order.id }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Order Details #{{ order.id }}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>Date:</strong> {{ order.order_date.strftime('%d %b %Y, %I:%M %p') }}</p>
+                        <p><strong>Total:</strong> {{ format_currency(order.total_amount) }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Status:</strong> 
+                            <span class="badge status-{{ order.status.lower() }}">{{ order.status }}</span>
+                        </p>
+                        <p><strong>Payment:</strong> 
+                            <span class="badge bg-{{ 'success' if order.payment_status == 'Paid' else 'warning' }}">
+                                {{ order.payment_status }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+
+                <h6 class="text-primary">Items Ordered</h6>
+                <ul class="list-group">
+                    {% for item in order.order_items %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ item.menu_item.name }}</strong> (x{{ item.quantity }})
+                            </div>
+                            <span>{{ format_currency(item.price * item.quantity) }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+
+                {% if order.special_instructions %}
+                    <h6 class="text-primary mt-3">Special Instructions</h6>
+                    <p class="text-muted">{{ order.special_instructions }}</p>
+                {% endif %}
+
+                {% if current_user.role in ['Admin', 'Staff'] and order.status != 'Completed' %}
+                    <hr>
+                    <h6 class="text-primary">Update Status</h6>
+                    <div class="btn-group w-100">
+                        <button class="btn btn-outline-secondary" onclick="UrbanPlatter.updateOrderStatus({{ order.id }}, 'Pending')">Pending</button>
+                        <button class="btn btn-outline-info" onclick="UrbanPlatter.updateOrderStatus({{ order.id }}, 'Preparing')">Preparing</button>
+                        <button class="btn btn-outline-success" onclick="UrbanPlatter.updateOrderStatus({{ order.id }}, 'Ready')">Ready</button>
+                        <button class="btn btn-outline-primary" onclick="UrbanPlatter.updateOrderStatus({{ order.id }}, 'Served')">Served</button>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                {% if order.payment_status == 'Pending' %}
+                    <a href="{{ url_for('payment_page', order_id=order.id) }}" class="btn btn-success">
+                        <i class="fas fa-credit-card me-1"></i>Pay Now
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

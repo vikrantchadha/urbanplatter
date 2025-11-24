@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Order Confirmation - {{ RESTAURANT_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg">
+                <div class="card-body text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle fa-5x text-success mb-3"></i>
+                        <h2 class="text-success mb-3">Order Confirmed!</h2>
+                        <p class="lead text-muted">Thank you for your order. We're preparing your delicious meal.</p>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">Order Number</h6>
+                                    <h4 class="text-primary">#{{ order.id }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">Estimated {{ 'Delivery' if order.delivery_type == 'delivery' else 'Pickup' }} Time</h6>
+                                    <h4 class="text-warning">{{ order.estimated_time }} min</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Details -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Order Details</h5>
+                        </div>
+                        <div class="card-body text-start">
+                            {% for item in order.order_items %}
+                            <div class="d-flex justify-content-between align-items-center py-2">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        <strong>{{ item['name'] }}</strong>
+                                        <small class="text-muted d-block">Qty: {{ item['quantity'] }}</small>
+                                    </div>
+                                </div>
+                                <span class="fw-bold">{{ format_currency(item['price'] * item['quantity']) }}</span>
+                            </div>
+                            {% if not loop.last %}<hr>{% endif %}
+                            {% endfor %}
+
+                            <hr>
+                            <div class="row">
+                                <div class="col-6 text-end">
+                                    <p class="mb-1">Subtotal:</p>
+                                    <p class="mb-1">Tax (8%):</p>
+                                    {% if order.delivery_type == 'delivery' %}
+                                    <p class="mb-1">Delivery Fee:</p>
+                                    {% endif %}
+                                    <strong>Total:</strong>
+                                </div>
+                                <div class="col-6">
+                                    <p class="mb-1">{{ format_currency(order.subtotal) }}</p>
+                                    <p class="mb-1">{{ format_currency(order.tax_amount) }}</p>
+                                    {% if order.delivery_type == 'delivery' %}
+                                    <p class="mb-1">{{ format_currency(order.delivery_fee) }}</p>
+                                    {% endif %}
+                                    <strong>{{ format_currency(order.total_amount) }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delivery/Pickup Information -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">{{ 'Delivery' if order.delivery_type == 'delivery' else 'Pickup' }} Information</h5>
+                        </div>
+                        <div class="card-body text-start">
+                            {% if order.delivery_type == 'delivery' %}
+                            <p><strong>Delivery Address:</strong><br>
+                            {{ order.delivery_address }}<br>
+                            {{ order.city }}, {{ order.state }} - {{ order.pincode }}</p>
+                            <p><strong>Contact:</strong> {{ order.customer_phone }}</p>
+                            {% else %}
+                            <p><strong>Pickup Location:</strong><br>
+                            Urban Platter Restaurant<br>
+                            123 Food Street, Downtown<br>
+                            Mumbai, Maharashtra 400001</p>
+                            <p><strong>Contact:</strong> +91 98765 43210</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-center gap-3 mb-4">
+                        <a href="{{ url_for('menu') }}" class="btn btn-primary">
+                            <i class="fas fa-utensils me-2"></i>Order Again
+                        </a>
+                        <button class="btn btn-outline-success" onclick="downloadReceipt()">
+                            <i class="fas fa-download me-2"></i>Download Receipt
+                        </button>
+                    </div>
+
+                    <!-- Contact Support -->
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Need help? Call us at <strong>+91 98765 43210</strong> or 
+                        <a href="mailto:support@urbanplatter.com">email support</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function downloadReceipt() {
+    window.open('/download-receipt/{{ order.id }}', '_blank');
+}
+</script>
+{% endblock %}

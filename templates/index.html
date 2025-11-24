@@ -1,0 +1,334 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome to {{ RESTAURANT_NAME }}{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Welcome to {{ RESTAURANT_NAME }}</h1>
+                <p class="lead mb-4">Experience authentic Indian cuisine crafted with love, served with passion. From traditional recipes to modern presentations, every dish tells a story.</p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{{ url_for('menu') }}" class="btn btn-light btn-lg">
+                        <i class="fas fa-utensils me-2"></i>View Menu
+                    </a>
+                    <a href="{{ url_for('reservations') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-calendar-alt me-2"></i>Book Table
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div class="logo-circle" style="width: 300px; height: 300px; border: 5px solid rgba(255,255,255,0.3);">
+                    <img src="{{ url_for('static', filename='images/urban-platter-logo.jpg') }}" alt="{{ RESTAURANT_NAME }} Logo">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold text-primary mb-3">Why Choose {{ RESTAURANT_NAME }}?</h2>
+                <p class="lead text-muted">We're committed to providing an exceptional dining experience</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 text-center dashboard-card">
+                    <div class="card-body">
+                        <div class="icon mb-3">
+                            <i class="fas fa-leaf text-success"></i>
+                        </div>
+                        <h4 class="fw-bold">Fresh Ingredients</h4>
+                        <p class="text-muted">We source the finest, freshest ingredients daily to ensure every dish bursts with authentic flavors.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 text-center dashboard-card">
+                    <div class="card-body">
+                        <div class="icon mb-3">
+                            <i class="fas fa-fire text-danger"></i>
+                        </div>
+                        <h4 class="fw-bold">Traditional Recipes</h4>
+                        <p class="text-muted">Our chefs bring generations of culinary expertise, preparing dishes using time-honored traditional methods.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 text-center dashboard-card">
+                    <div class="card-body">
+                        <div class="icon mb-3">
+                            <i class="fas fa-heart text-primary"></i>
+                        </div>
+                        <h4 class="fw-bold">Made with Love</h4>
+                        <p class="text-muted">Every dish is prepared with passion and attention to detail, ensuring a memorable dining experience.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Menu Items -->
+{% if featured_items %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold text-primary mb-3">Featured Dishes</h2>
+                <p class="lead text-muted">Discover our most popular and chef-recommended specialties</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            {% for item in featured_items %}
+            <div class="col-lg-4 col-md-6">
+                <div class="card menu-item-card fade-in">
+                    <img src="{{ item.image_url }}" class="card-img-top" alt="{{ item.name }}">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold text-primary">{{ item.name }}</h5>
+                        <p class="card-text text-muted">{{ item.description }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="price-tag">{{ format_currency(item.price) }}</span>
+                            {% if current_user.is_authenticated and current_user.role == 'Customer' %}
+                            <button class="btn btn-outline-primary btn-sm" onclick="addToCart({{ item.id }})">
+                                <i class="fas fa-plus me-1"></i>Add to Cart
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-5">
+            <a href="{{ url_for('menu') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-utensils me-2"></i>View Full Menu
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Call to Action Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100 border-0" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white;">
+                    <div class="card-body d-flex align-items-center">
+                        <div>
+                            <h3 class="fw-bold mb-3">Order Online</h3>
+                            <p class="mb-4">Enjoy our delicious food from the comfort of your home. Quick delivery, fresh taste!</p>
+                            <a href="{{ url_for('menu') }}" class="btn btn-light btn-lg">
+                                <i class="fas fa-shopping-bag me-2"></i>Order Now
+                            </a>
+                        </div>
+                        <div class="ms-3">
+                            <i class="fas fa-motorcycle" style="font-size: 4rem; opacity: 0.3;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="card h-100 border-0" style="background: linear-gradient(135deg, var(--secondary-color), #b5834e); color: white;">
+                    <div class="card-body d-flex align-items-center">
+                        <div>
+                            <h3 class="fw-bold mb-3">Reserve a Table</h3>
+                            <p class="mb-4">Book your table for an unforgettable dining experience with family and friends.</p>
+                            <a href="{{ url_for('reservations') }}" class="btn btn-light btn-lg">
+                                <i class="fas fa-calendar-alt me-2"></i>Book Now
+                            </a>
+                        </div>
+                        <div class="ms-3">
+                            <i class="fas fa-utensils" style="font-size: 4rem; opacity: 0.3;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold text-primary mb-3">What Our Customers Say</h2>
+                <p class="lead text-muted">Don't just take our word for it</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                        </div>
+                        <p class="card-text">"The best Indian restaurant in the city! The flavors are authentic and the service is exceptional. Highly recommended!"</p>
+                        <footer class="text-muted">- Priya Sharma</footer>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                        </div>
+                        <p class="card-text">"Amazing food quality and great ambiance. The online ordering system is so convenient. Will definitely order again!"</p>
+                        <footer class="text-muted">- Rajesh Kumar</footer>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                        </div>
+                        <p class="card-text">"Perfect place for family dinner. The staff is friendly and the food is always fresh and delicious. Love the variety!"</p>
+                        <footer class="text-muted">- Anjali Patel</footer>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Shopping Cart Functionality
+let cart = [];
+
+function addToCart(itemId) {
+    // Find if item already exists in cart
+    const existingItem = cart.find(item => item.id === itemId);
+    
+    if (existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        // Fetch item details and add to cart
+        fetch(`/api/menu_items`)
+            .then(response => response.json())
+            .then(items => {
+                const item = items.find(i => i.id === itemId);
+                if (item) {
+                    cart.push({
+                        id: item.id,
+                        name: item.name,
+                        price: item.price,
+                        quantity: 1
+                    });
+                    updateCartUI();
+                }
+            });
+    }
+    
+    // Show success message
+    showToast('Item added to cart!', 'success');
+}
+
+function updateCartUI() {
+    // Update cart counter in navigation if it exists
+    const cartCounter = document.getElementById('cart-counter');
+    if (cartCounter) {
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        cartCounter.textContent = totalItems;
+        cartCounter.style.display = totalItems > 0 ? 'inline' : 'none';
+    }
+}
+
+function showToast(message, type = 'info') {
+    // Create and show Bootstrap toast
+    const toastContainer = document.getElementById('toast-container') || createToastContainer();
+    
+    const toast = document.createElement('div');
+    toast.className = `toast align-items-center text-bg-${type} border-0`;
+    toast.setAttribute('role', 'alert');
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">${message}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    `;
+    
+    toastContainer.appendChild(toast);
+    new bootstrap.Toast(toast).show();
+    
+    // Remove toast after it's hidden
+    toast.addEventListener('hidden.bs.toast', () => {
+        toast.remove();
+    });
+}
+
+function createToastContainer() {
+    const container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+    document.body.appendChild(container);
+    return container;
+}
+
+// Smooth scrolling for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+});
+
+// Add fade-in animation to elements when they come into view
+const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('fade-in');
+            observer.unobserve(entry.target);
+        }
+    });
+}, observerOptions);
+
+document.querySelectorAll('.card').forEach(el => {
+    observer.observe(el);
+});
+</script>
+{% endblock %}

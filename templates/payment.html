@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Payment - {{ RESTAURANT_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-credit-card me-2"></i>Payment</h4>
+                </div>
+                <div class="card-body">
+                    <h5>Order Summary</h5>
+                    <div class="table-responsive mb-4">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.order_items %}
+                                <tr>
+                                    <td>{{ item.menu_item.name }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>{{ format_currency(item.price) }}</td>
+                                    <td>{{ format_currency(item.price * item.quantity) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <th colspan="3">Total Amount:</th>
+                                    <th>{{ format_currency(order.total_amount) }}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Payment Methods</h6>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="payment_method" id="cash" value="Cash" checked>
+                                <label class="form-check-label" for="cash">
+                                    <i class="fas fa-money-bill me-2"></i>Cash on Delivery
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="payment_method" id="card" value="Card">
+                                <label class="form-check-label" for="card">
+                                    <i class="fas fa-credit-card me-2"></i>Credit/Debit Card
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="payment_method" id="online" value="Online">
+                                <label class="form-check-label" for="online">
+                                    <i class="fas fa-globe me-2"></i>Online Payment
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Order Details</h6>
+                            <p><strong>Order #:</strong> {{ order.id }}</p>
+                            <p><strong>Date:</strong> {{ order.order_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                            <p><strong>Status:</strong> 
+                                <span class="badge bg-warning">{{ order.status }}</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+                            <i class="fas fa-arrow-left me-2"></i>BACK
+                        </button>
+                        
+                        <button type="button" class="btn btn-success btn-lg" onclick="processPayment()">
+                            <i class="fas fa-check me-2"></i>CONFIRM PAYMENT
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// GUARANTEED WORKING PAYMENT FUNCTION
+function processPayment() {
+    console.log('Payment button clicked for Order {{ order.id }}');
+    
+    // Get payment method
+    const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+    
+    // Show user that processing is happening
+    const btn = event.target;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+    
+    // Use the exact same fetch request that works in simple_payment
+    fetch('/process_payment', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            order_id: {{ order.id }},
+            payment_method: paymentMethod
+        })
+    })
+    .then(function(response) {
+        return response.json();
+    })
+    .then(function(data) {
+        if (data.success) {
+            alert('Payment successful!');
+            window.location.href = '/order-confirmation/{{ order.id }}';
+        } else {
+            alert('Payment failed: ' + data.error);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check me-2"></i>CONFIRM PAYMENT';
+        }
+    })
+    .catch(function(error) {
+        alert('Error: ' + error.message);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check me-2"></i>CONFIRM PAYMENT';
+    });
+}
+</script>
+{% endblock %}

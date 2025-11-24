@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Shopping Cart - {{ RESTAURANT_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-shopping-cart me-2"></i>Your Cart</h4>
+                </div>
+                <div class="card-body">
+                    <div id="cart-items">
+                        {% if cart_items %}
+                            {% for item in cart_items %}
+                            <div class="cart-item" data-item-id="{{ item.id }}">
+                                <div class="row align-items-center border-bottom py-3">
+                                    <div class="col-md-2">
+                                        <img src="{{ item.image_url or '/static/images/menu/placeholder-food.jpg' }}" 
+                                             class="img-fluid rounded" alt="{{ item.name }}" style="max-height: 80px;">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6 class="mb-1">{{ item.name }}</h6>
+                                        <small class="text-muted">{{ item.description[:50] }}...</small>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <span class="fw-bold text-success">{{ format_currency(item.price) }}</span>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="input-group input-group-sm">
+                                            <button class="btn btn-outline-secondary quantity-btn" type="button" 
+                                                    onclick="updateQuantity({{ item.id }}, -1)">-</button>
+                                            <input type="text" class="form-control text-center quantity-input" 
+                                                   value="{{ item.quantity }}" readonly>
+                                            <button class="btn btn-outline-secondary quantity-btn" type="button" 
+                                                    onclick="updateQuantity({{ item.id }}, 1)">+</button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 text-end">
+                                        <div class="item-total fw-bold">{{ format_currency(item.price * item.quantity) }}</div>
+                                        <button class="btn btn-sm btn-outline-danger mt-1" 
+                                                onclick="removeFromCart({{ item.id }})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                                <h5>Your cart is empty</h5>
+                                <p class="text-muted">Add some delicious items from our menu</p>
+                                <a href="{{ url_for('menu') }}" class="btn btn-primary">Browse Menu</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal:</span>
+                        <span id="subtotal">{{ format_currency(subtotal or 0) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tax (8%):</span>
+                        <span id="tax">{{ format_currency((subtotal or 0) * 0.08) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Delivery Fee:</span>
+                        <span id="delivery-fee">₹25.00</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong>Total:</strong>
+                        <strong id="total">{{ format_currency((subtotal or 0) * 1.08 + 25) }}</strong>
+                    </div>
+
+                    {% if cart_items %}
+                    <div class="mb-3">
+                        <label for="special-instructions" class="form-label">Special Instructions</label>
+                        <textarea class="form-control" id="special-instructions" rows="3" 
+                                  placeholder="Any special requests for your order..."></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-success btn-lg" onclick="proceedToCheckout()">
+                            <i class="fas fa-credit-card me-2"></i>Proceed to Checkout
+                        </button>
+                        <a href="{{ url_for('menu') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-plus me-2"></i>Add More Items
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateQuantity(itemId, change) {
+    const cartItem = document.querySelector(`[data-item-id="${itemId}"]`);
+    const quantityInput = cartItem.querySelector('.quantity-input');
+    let newQuantity = parseInt(quantityInput.value) + change;
+
+    if (newQuantity < 1) {
+        removeFromCart(itemId);
+        return;
+    }
+
+    fetch('/update-cart-item', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            item_id: itemId,
+            quantity: newQuantity
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            quantityInput.value = newQuantity;
+            cartItem.querySelector('.item-total').textContent = `₹${(data.new_total).toFixed(2)}`;
+            document.getElementById('subtotal').textContent = `₹${data.subtotal.toFixed(2)}`;
+            document.getElementById('tax').textContent = `₹${(data.subtotal * 0.08).toFixed(2)}`;
+            document.getElementById('total').textContent = `₹${(data.subtotal * 1.08 + 25).toFixed(2)}`;
+        } else {
+            showAlert('Error updating cart', 'error');
+        }
+    });
+}
+
+function removeFromCart(itemId) {
+    if (confirm('Remove this item from your cart?')) {
+        fetch('/remove-from-cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({item_id: itemId})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+}
+
+function proceedToCheckout() {
+    const specialInstructions = document.getElementById('special-instructions').value;
+
+    fetch('/save-instructions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            special_instructions: specialInstructions
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        window.location.href = '/checkout';
+    });
+}
+
+function showAlert(message, type = 'success') {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type === 'error' ? 'danger' : 'success'} alert-dismissible fade show position-fixed`;
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(alertDiv);
+
+    setTimeout(() => alertDiv.remove(), 5000);
+}
+</script>
+{% endblock %}

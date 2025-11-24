@@ -1,0 +1,365 @@
+{% extends "base.html" %}
+
+{% block title %}Reservations - {{ RESTAURANT_NAME }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.reservation-hero {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 60px 0;
+    text-align: center;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Reservation Hero Section -->
+<section class="reservation-hero">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-3">Reserve Your Table</h1>
+        <p class="lead">Book a table at {{ RESTAURANT_NAME }} for an unforgettable dining experience</p>
+    </div>
+</section>
+
+<!-- Reservation Form Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                {% if current_user.is_authenticated %}
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Make a Reservation</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="POST" id="reservationForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="date" class="form-label">
+                                        <i class="fas fa-calendar me-2 text-primary"></i>Preferred Date
+                                    </label>
+                                    <input type="date" 
+                                           class="form-control" 
+                                           id="date" 
+                                           name="date" 
+                                           required
+                                           min="{{ today }}">
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="time" class="form-label">
+                                        <i class="fas fa-clock me-2 text-primary"></i>Preferred Time
+                                    </label>
+                                    <select class="form-select" id="time" name="time" required>
+                                        <option value="">Choose time slot</option>
+                                        <option value="11:00">11:00 AM</option>
+                                        <option value="11:30">11:30 AM</option>
+                                        <option value="12:00">12:00 PM</option>
+                                        <option value="12:30">12:30 PM</option>
+                                        <option value="13:00">1:00 PM</option>
+                                        <option value="13:30">1:30 PM</option>
+                                        <option value="14:00">2:00 PM</option>
+                                        <option value="14:30">2:30 PM</option>
+                                        <option value="15:00">3:00 PM</option>
+                                        <option value="18:00">6:00 PM</option>
+                                        <option value="18:30">6:30 PM</option>
+                                        <option value="19:00">7:00 PM</option>
+                                        <option value="19:30">7:30 PM</option>
+                                        <option value="20:00">8:00 PM</option>
+                                        <option value="20:30">8:30 PM</option>
+                                        <option value="21:00">9:00 PM</option>
+                                        <option value="21:30">9:30 PM</option>
+                                        <option value="22:00">10:00 PM</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="party_size" class="form-label">
+                                        <i class="fas fa-users me-2 text-primary"></i>Party Size
+                                    </label>
+                                    <select class="form-select" id="party_size" name="party_size" required>
+                                        <option value="">Number of guests</option>
+                                        <option value="1">1 Person</option>
+                                        <option value="2">2 People</option>
+                                        <option value="3">3 People</option>
+                                        <option value="4">4 People</option>
+                                        <option value="5">5 People</option>
+                                        <option value="6">6 People</option>
+                                        <option value="7">7 People</option>
+                                        <option value="8">8 People</option>
+                                        <option value="9">9 People</option>
+                                        <option value="10">10 People</option>
+                                        <option value="10+">More than 10</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="customer_name" class="form-label">
+                                        <i class="fas fa-user me-2 text-primary"></i>Contact Name
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="customer_name" 
+                                           value="{{ current_user.username }}" 
+                                           readonly>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="special_requests" class="form-label">
+                                    <i class="fas fa-comment me-2 text-primary"></i>Special Requests (Optional)
+                                </label>
+                                <textarea class="form-control" 
+                                          id="special_requests" 
+                                          name="special_requests" 
+                                          rows="3" 
+                                          placeholder="Any special requests, dietary restrictions, or occasions (birthday, anniversary, etc.)"></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-lg w-100">
+                                <i class="fas fa-check me-2"></i>Make Reservation
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <!-- Login Required Message -->
+                <div class="card shadow-lg">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-user-circle fa-3x text-primary mb-3"></i>
+                        <h3 class="text-primary mb-3">Login Required</h3>
+                        <p class="text-muted mb-4">Please log in to make a table reservation at {{ RESTAURANT_NAME }}.</p>
+                        <div class="d-flex gap-3 justify-content-center">
+                            <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login
+                            </a>
+                            <a href="{{ url_for('register') }}" class="btn btn-outline-primary btn-lg">
+                                <i class="fas fa-user-plus me-2"></i>Create Account
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Restaurant Info Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold text-primary mb-3">Visit {{ RESTAURANT_NAME }}</h2>
+                <p class="lead text-muted">Everything you need to know for your visit</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <i class="fas fa-clock fa-3x text-primary mb-3"></i>
+                        <h5 class="fw-bold">Opening Hours</h5>
+                        <div class="text-muted">
+                            <p class="mb-1"><strong>Monday - Friday:</strong></p>
+                            <p class="mb-3">11:00 AM - 10:00 PM</p>
+                            <p class="mb-1"><strong>Saturday - Sunday:</strong></p>
+                            <p class="mb-0">10:00 AM - 11:00 PM</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <i class="fas fa-map-marker-alt fa-3x text-primary mb-3"></i>
+                        <h5 class="fw-bold">Location</h5>
+                        <div class="text-muted">
+                            <p>123 Food Street<br>
+                            Delhi, India - 110001</p>
+                            <a href="#" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-directions me-1"></i>Get Directions
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <i class="fas fa-phone fa-3x text-primary mb-3"></i>
+                        <h5 class="fw-bold">Contact</h5>
+                        <div class="text-muted">
+                            <p class="mb-2"><strong>Phone:</strong><br>+91 98765 43210</p>
+                            <p class="mb-0"><strong>Email:</strong><br>contact@urbanplatter.com</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Reservation Policy Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0 text-primary">
+                            <i class="fas fa-info-circle me-2"></i>Reservation Policy
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-primary">Booking Guidelines</h6>
+                                <ul class="list-unstyled">
+                                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Reservations can be made up to 30 days in advance</li>
+                                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Minimum party size: 1 person</li>
+                                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Maximum party size: 10 people (call for larger groups)</li>
+                                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Tables are held for 15 minutes past reservation time</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-primary">Cancellation Policy</h6>
+                                <ul class="list-unstyled">
+                                    <li class="mb-2"><i class="fas fa-info text-primary me-2"></i>Free cancellation up to 2 hours before</li>
+                                    <li class="mb-2"><i class="fas fa-info text-primary me-2"></i>Please call if you're running late</li>
+                                    <li class="mb-2"><i class="fas fa-info text-primary me-2"></i>Group bookings require 24-hour notice</li>
+                                    <li class="mb-2"><i class="fas fa-info text-primary me-2"></i>Special occasion setup available on request</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Set minimum date to today
+document.addEventListener('DOMContentLoaded', function() {
+    const dateInput = document.getElementById('date');
+    if (dateInput) {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.min = today;
+        
+        // Set default date to today
+        dateInput.value = today;
+    }
+    
+    // Form validation
+    const reservationForm = document.getElementById('reservationForm');
+    if (reservationForm) {
+        reservationForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            validateAndSubmitReservation();
+        });
+    }
+});
+
+function validateAndSubmitReservation() {
+    const form = document.getElementById('reservationForm');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    
+    // Get form data
+    const date = document.getElementById('date').value;
+    const time = document.getElementById('time').value;
+    const partySize = document.getElementById('party_size').value;
+    const specialRequests = document.getElementById('special_requests').value;
+    
+    // Validate required fields
+    if (!date || !time || !partySize) {
+        showToast('Please fill in all required fields', 'warning');
+        return;
+    }
+    
+    // Validate date is not in the past
+    const selectedDate = new Date(date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (selectedDate < today) {
+        showToast('Please select a future date', 'warning');
+        return;
+    }
+    
+    // Show loading state
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Making Reservation...';
+    submitBtn.disabled = true;
+    
+    // Submit form
+    const formData = new FormData();
+    formData.append('date', date);
+    formData.append('time', time);
+    formData.append('party_size', partySize);
+    formData.append('special_requests', specialRequests);
+    
+    fetch('/reservations', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.ok) {
+            showToast('Reservation request submitted successfully! We will confirm shortly.', 'success');
+            form.reset();
+            // Set date back to today
+            document.getElementById('date').value = new Date().toISOString().split('T')[0];
+        } else {
+            throw new Error('Failed to make reservation');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Failed to make reservation. Please try again or call us directly.', 'danger');
+    })
+    .finally(() => {
+        // Reset button
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+}
+
+function showToast(message, type = 'info') {
+    const toastContainer = document.getElementById('toast-container') || createToastContainer();
+    
+    const toast = document.createElement('div');
+    toast.className = `toast align-items-center text-bg-${type} border-0`;
+    toast.setAttribute('role', 'alert');
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">${message}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    `;
+    
+    toastContainer.appendChild(toast);
+    new bootstrap.Toast(toast).show();
+    
+    toast.addEventListener('hidden.bs.toast', () => {
+        toast.remove();
+    });
+}
+
+function createToastContainer() {
+    const container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+    container.style.zIndex = '1100';
+    document.body.appendChild(container);
+    return container;
+}
+</script>
+{% endblock %}
