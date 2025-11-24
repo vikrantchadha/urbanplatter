@@ -1084,6 +1084,35 @@ def init_db():
     print(f"👨‍🍳 Staff: staff@urbanplatter.com / staff123")
     print(f"💰 All prices in {CURRENCY_SYMBOL}")
 
+# ==========================================
+# Policy Pages Routes
+# ==========================================
+
+@app.route('/terms-and-conditions')
+def terms_and_conditions():
+    """Terms and Conditions page"""
+    return render_template('terms-and-conditions.html')
+
+@app.route('/privacy-policy')
+def privacy_policy():
+    """Privacy Policy page"""
+    return render_template('privacy-policy.html')
+
+@app.route('/shipping-policy')
+def shipping_policy():
+    """Shipping and Delivery Policy page"""
+    return render_template('shipping-policy.html')
+
+@app.route('/contact-us')
+def contact_us():
+    """Contact Us page"""
+    return render_template('contact-us.html')
+
+@app.route('/cancellation-refunds')
+def cancellation_refunds():
+    """Cancellation and Refunds Policy page"""
+    return render_template('cancellation-refunds.html')
+
 if __name__ == '__main__':
     with app.app_context():
         init_db()
