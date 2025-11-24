@@ -136,9 +136,11 @@ class Review(db.Model):
     comment = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-# Create database tables when module is loaded
-with app.app_context():
-            db.create_all()
+# Initialize database on first request
+@app.before_first_request
+def initialize_database():
+        db.create_all()
+
 
 # Helper functions
 @login_manager.user_loader
