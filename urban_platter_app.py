@@ -43,6 +43,10 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+# Create database tables
+with app.app_context():
+        db.create_all()
+
 # Stripe configuration (use environment variables)
 stripe.api_key = os.environ.get("STRIPE_SECRET_KEY", "sk_test_placeholder")
 
@@ -1117,5 +1121,4 @@ if __name__ == '__main__':
     with app.app_context():
         init_db()
     print(f"🚀 {RESTAURANT_NAME} Management System starting...")
-    print("📱 Access at: http://http://localhost:5000")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    print("📱 Access at: http://localhost:5000")    app.run(debug=True, host='0.0.0.0', port=5000)
