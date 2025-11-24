@@ -43,9 +43,6 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-# Create database tables
-with app.app_context():
-        db.create_all()
 
 # Stripe configuration (use environment variables)
 stripe.api_key = os.environ.get("STRIPE_SECRET_KEY", "sk_test_placeholder")
@@ -138,6 +135,10 @@ class Review(db.Model):
     rating = db.Column(db.Integer, nullable=False)  # 1-5 stars
     comment = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+# Create database tables when module is loaded
+with app.app_context():
+            db.create_all()
 
 # Helper functions
 @login_manager.user_loader
