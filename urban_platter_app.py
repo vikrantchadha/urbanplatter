@@ -1132,9 +1132,39 @@ def cancellation_refunds():
     return render_template('cancellation-refunds.html')
 
 
+def migrate_database():
+    """Add missing columns to existing tables"""
+    try:
+        # Check if delivery_address column exists
+        with db.engine.connect() as conn:
+            result = conn.execute(db.text(
+                "PRAGMA table_info('order')"
+            ))
+            columns = [row[1] for row in result]
+            
+            # Add delivery_address if missing
+            if 'delivery_address' not in columns:
+                conn.execute(db.text(
+                    "ALTER TABLE 'order' ADD COLUMN delivery_address TEXT"
+                ))
+                conn.commit()
+                print("✅ Added delivery_address column to Order table")
+            
+            # Add contact_number if missing
+            if 'contact_number' not in columns:
+                conn.execute(db.text(
+                    "ALTER TABLE 'order' ADD COLUMN contact_number VARCHAR(20)"
+                ))
+                conn.commit()
+                print("✅ Added contact_number column to Order table")
+    except Exception as e:
+        print(f"⚠️  Migration error: {e}")
+        pass
+
 # Initialize database when module is imported
 with app.app_context():
     db.create_all()  # 1122
+        migrate_database()  # Add missing columns to existing tables
 
     try:        # Initialize database with menu items if empty
                 if MenuItem.query.count() == 0:
