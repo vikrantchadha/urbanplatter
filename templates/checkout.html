@@ -234,35 +234,112 @@ function placeOrder() {
         return;
     }
 
+
     const formData = new FormData(document.getElementById('checkout-form'));
     const orderData = Object.fromEntries(formData);
-
+    const paymentMethod = orderData.payment_method;
+    
     document.getElementById('place-order-btn').disabled = true;
     document.getElementById('place-order-btn').innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
-
-    fetch('/create-order', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orderData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            window.location.href = `/order-confirmation/${data.order_id}`;
-        } else {
-            showAlert(data.message || 'Failed to create order', 'error');
+    
+    // Check if Cash on Delivery
+    if (paymentMethod === 'cod') {
+        // Direct order creation for COD
+        fetch('/create-order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(orderData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = `/order-confirmation/${data.order_id}`;
+            } else {
+                showAlert(data.message || 'Failed to create order', 'error');
+                document.getElementById('place-order-btn').disabled = false;
+                document.getElementById('place-order-btn').innerHTML = '<i class="fas fa-check me-2"></i>Place Order';
+            }
+        })
+        .catch(error => {
+            showAlert('An error occurred. Please try again.', 'error');
             document.getElementById('place-order-btn').disabled = false;
             document.getElementById('place-order-btn').innerHTML = '<i class="fas fa-check me-2"></i>Place Order';
-        }
-    })
-    .catch(error => {
-        showAlert('An error occurred. Please try again.', 'error');
-        document.getElementById('place-order-btn').disabled = false;
-        document.getElementById('place-order-btn').innerHTML = '<i class="fas fa-check me-2"></i>Place Order';
-    });
-}
+        });
+    } else {
+        // Razorpay integration for online payments
+        fetch('/create-razorpay-order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(orderData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.razorpay_order_id) {
+                const options = {
+                    key: 'rzp_live_ENqRT8xxOaN61a',
+                    amount: data.amount,
+                    currency: 'INR',
+                    name: 'Urban Platter',
+                    description: 'Food Order Payment',
+                    order_id: data.razorpay_order_id,
+                    method: {
+                        card: false,
+                        upi: true,
+                        netbanking: true,
+                        wallet: true
+                    },
+                    handler: function(response) {
+                        // Payment successful
+                        fetch('/verify-payment', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_signature: response.razorpay_signature,
+                                order_id: data.order_id
+                            })
+                        })
+                        .then(res => res.json())
+                        .then(verifyData => {
+                            if (verifyData.success) {
+                                window.location.href = `/order-confirmation/${data.order_id}`;
+                            } else {
+                                showAlert('Payment verification failed', 'error');
+                                document.getElementById('place-order-btn').disabled = false;
+                                document.getElementById('place-order-btn').innerHTML = '<i class="fas fa-check me-2"></i>Place Order';
+                            }
+                        });
+                    },
+                    modal: {
+                        ondismiss: function() {
+                            showAlert('Payment cancelled', 'error');
+                            document.getElementById('place-order-btn').disabled = false;
+                            document.getElementById('place-order-btn').innerHTML = '<i class="fas fa-check me-2"></i>Place Order';
+                        }
+                    }
+                };
+                
+                const rzp = new Razorpay(options);
+                rzp.open();
+            } else {
+                showAlert(data.message || 'Failed to create order', 'error');
+                document.getElementById('place-order-btn').disabled = false;
+                document.getElementById('place-order-btn').innerHTML = '<i class="fas fa-check me-2"></i>Place Order';
+            }
+        })
+        .catch(error => {
+            showAlert('An error occurred. Please try again.', 'error');
+            document.getElementById('place-order-btn').disabled = false;
+            document.getElementById('place-order-btn').innerHTML = '<i class="fas fa-check me-2"></i>Place Order';
+        });
+    }
 
 function showAlert(message, type = 'success') {
     const alertDiv = document.createElement('div');
