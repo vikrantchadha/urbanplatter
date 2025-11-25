@@ -14,6 +14,7 @@ class RazorpayIntegration:
         
         if not self.key_id or not self.key_secret:
             logger.error("Razorpay API keys not found in environment variables")
+                        self.client = None
                         return
             # raise ValueError("Razorpay API keys must be set in environment variables")  # Commented to prevent app crash        
         # Initialize Razorpay client
@@ -32,6 +33,8 @@ class RazorpayIntegration:
         Returns:
             dict: Order details from Razorpay
         """
+                if not self.client:
+                                return {'success': False, 'error': 'Razorpay client not initialized'}
         try:
             order_data = {
                 'amount': amount,  # Amount in paise
@@ -67,6 +70,8 @@ class RazorpayIntegration:
         Returns:
             bool: True if signature is valid, False otherwise
         """
+                if not self.client:
+                                return False
         try:
             params_dict = {
                 'razorpay_order_id': order_id,
@@ -91,6 +96,8 @@ class RazorpayIntegration:
         Returns:
             dict: Payment details
         """
+                if not self.client:
+                                return {'success': False, 'error': 'Razorpay client not initialized'}
         try:
             payment = self.client.payment.fetch(payment_id)
             return {
