@@ -1121,7 +1121,7 @@ def cancellation_refunds():
 with app.app_context():
     db.create_all()  # 1122
 
-        try:
+    try:
     # Initialize database with menu items if empty
                 if MenuItem.query.count() == 0:
                     init_db()
