@@ -1161,7 +1161,7 @@ def migrate_database():
 # Initialize database when module is imported
 with app.app_context():
     db.create_all()  # 1122
-        migrate_database()  # Add missing columns to existing tables
+    migrate_database()  # Add missing columns to existing tables
 
     try:        # Initialize database with menu items if empty
                 if MenuItem.query.count() == 0:
