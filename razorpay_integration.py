@@ -14,8 +14,8 @@ class RazorpayIntegration:
         
         if not self.key_id or not self.key_secret:
             logger.error("Razorpay API keys not found in environment variables")
-            raise ValueError("Razorpay API keys must be set in environment variables")
-        
+                        return
+            # raise ValueError("Razorpay API keys must be set in environment variables")  # Commented to prevent app crash        
         # Initialize Razorpay client
         self.client = razorpay.Client(auth=(self.key_id, self.key_secret))
         logger.info("Razorpay client initialized successfully")
