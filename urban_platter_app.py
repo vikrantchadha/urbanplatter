@@ -93,7 +93,7 @@ class Order(db.Model):
     order_date = db.Column(db.DateTime, default=datetime.utcnow)
     payment_status = db.Column(db.String(20), default='Pending')  # Pending, Paid, Failed
     special_instructions = db.Column(db.Text)
-        delivery_address = db.Column(db.Text)
+    delivery_address = db.Column(db.Text)
     contact_number = db.Column(db.String(20))
     
     # Relationships
