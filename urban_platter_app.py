@@ -1119,10 +1119,11 @@ def cancellation_refunds():
 
 # Initialize database when module is imported
 with app.app_context():
-    db.create_all()  # Create empty tables on startup
-if __name__ == '__main__':
-    with app.app_context():
-                # Initialize database with menu items if empty
+    db.create_all()  # 1122
+
+    # Initialize database with menu items if empty
         if MenuItem.query.count() == 0:
-            init_db()
+        init_db()1127
+            
+if __name__ == '__main__':
         app.run(debug=True, host='0.0.0.0', port=5000)
