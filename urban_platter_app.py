@@ -93,6 +93,8 @@ class Order(db.Model):
     order_date = db.Column(db.DateTime, default=datetime.utcnow)
     payment_status = db.Column(db.String(20), default='Pending')  # Pending, Paid, Failed
     special_instructions = db.Column(db.Text)
+        delivery_address = db.Column(db.Text)
+    contact_number = db.Column(db.String(20))
     
     # Relationships
     order_items = db.relationship('OrderItem', backref='order', lazy=True, cascade='all, delete-orphan')
@@ -593,6 +595,8 @@ def process_payment():
     order_id = request.json.get('order_id')
     payment_method = request.json.get('payment_method')
     stripe_token = request.json.get('stripe_token')
+    delivery_address = request.json.get('delivery_address')
+    contact_number = request.json.get('contact_number')
     
     order = Order.query.get_or_404(order_id)
     
@@ -619,6 +623,10 @@ def process_payment():
                 amount=order.total_amount,
                 payment_method=payment_method
             )
+
+                # Update order with delivery details
+                order.delivery_address = delivery_address
+                    order.contact_number = contact_number
         
         order.payment_status = 'Paid'
         db.session.add(payment)
