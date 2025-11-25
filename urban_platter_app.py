@@ -486,6 +486,13 @@ def view_orders():
     
     return render_template('orders.html', orders=orders)
 
+
+# Route - Order Confirmation Page
+@app.route('/order-confirmation/<int:order_id>')
+def order_confirmation(order_id):
+        """Display order confirmation page"""
+        order = Order.query.get_or_404(order_id)
+        return render_template('order-confirmation.html', order=order)
 @app.route('/orders/<int:order_id>/status', methods=['POST'])
 @admin_or_staff_required
 def update_order_status(order_id):
