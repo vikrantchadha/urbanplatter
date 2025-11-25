@@ -23,7 +23,8 @@ import stripe
 import csv
 import io
 import base64
-import razorpayimport os
+from functools import wraps
+import os
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -43,12 +44,14 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 
-# Valid categories for menu items
+# Stripe configuration (use environment variables)
+stripe.api_key = os.environ.get("STRIPE_SECRET_KEY", "sk_test_placeholder")
 
-# Razorpay configuration (use environment variables)
-razorpay_key_id = os.environ.get("RAZORPAY_KEY_ID", "rzp_live_ENqRT8xxOaN61a")
-razorpay_key_secret = os.environ.get("RAZORPAY_KEY_SECRET", "")
-razorpay_client = razorpay.Client(auth=(razorpay_key_id, razorpay_key_secret))RESTAURANT_NAME = "Urban Platter"
+# Valid categories for menu items
+VALID_CATEGORIES = {'Starters', 'Main Course', 'Desserts', 'Drinks'}
+
+# Restaurant configuration
+RESTAURANT_NAME = "Urban Platter"
 CURRENCY_SYMBOL = "₹"
 
 # Database Models
@@ -588,87 +591,6 @@ def payment_page(order_id):
 def process_payment():
     """Process payment (Stripe integration)"""
     order_id = request.json.get('order_id')
-
-    # Razorpay Payment Routes
-@app.route('/create-razorpay-order', methods=['POST'])
-@login_required
-def create_razorpay_order():
-    """Create Razorpay order"""
-    try:
-        order_id = request.json.get('order_id')
-        order = Order.query.get_or_404(order_id)
-        
-        # Check if user owns this order
-        if current_user.role == 'customer' and order.customer_id != current_user.id:
-            return jsonify({'error': 'Access denied'}), 403
-        
-        # Create Razorpay order
-        amount_in_paise = int(order.total_amount * 100)
-        razorpay_order = razorpay_client.order.create({
-            'amount': amount_in_paise,
-            'currency': 'INR',
-            'receipt': f'order_{order.id}',
-            'notes': {
-                'order_id': order.id,
-                'customer_name': order.customer.name if order.customer else 'Guest'
-            }
-        })
-        
-        return jsonify({
-            'success': True,
-            'razorpay_order_id': razorpay_order['id'],
-            'razorpay_key_id': razorpay_key_id,
-            'amount': amount_in_paise,
-            'currency': 'INR',
-            'order_id': order.id
-        })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
-
-@app.route('/verify-payment', methods=['POST'])
-@login_required
-def verify_payment():
-    """Verify Razorpay payment"""
-    try:
-        payment_id = request.json.get('razorpay_payment_id')
-        razorpay_order_id = request.json.get('razorpay_order_id')
-        signature = request.json.get('razorpay_signature')
-        order_id = request.json.get('order_id')
-        
-        order = Order.query.get_or_404(order_id)
-        
-        # Verify signature
-        params_dict = {
-            'razorpay_order_id': razorpay_order_id,
-            'razorpay_payment_id': payment_id,
-            'razorpay_signature': signature
-        }
-        
-        razorpay_client.utility.verify_payment_signature(params_dict)
-        
-        # Create payment record
-        payment = Payment(
-            order_id=order.id,
-            amount=order.total_amount,
-            payment_method='online',
-            razorpay_payment_id=payment_id,
-            razorpay_order_id=razorpay_order_id
-        )
-        
-        order.payment_status = 'Paid'
-        db.session.add(payment)
-        db.session.commit()
-        
-        return jsonify({
-            'success': True,
-            'message': 'Payment verified successfully',
-            'order_id': order.id
-        })
-    except razorpay.errors.SignatureVerificationError:
-        return jsonify({'error': 'Invalid payment signature'}), 400
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
-
     payment_method = request.json.get('payment_method')
     stripe_token = request.json.get('stripe_token')
     
