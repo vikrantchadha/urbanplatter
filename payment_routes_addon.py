@@ -1,6 +1,7 @@
 # Add these routes to your existing urban_platter_app.py
 
 from flask import session
+from razorpay_integration import razorpay_integration
 import json
 from datetime import datetime
 
@@ -263,3 +264,148 @@ def menu():
                          categories=categories, 
                          menu_items=menu_items,
                          cart_count=cart_count)
+
+# Razorpay Payment Routes
+
+@app.route('/get-razorpay-key', methods=['GET'])
+def get_razorpay_key():
+    """Get Razorpay key for frontend integration"""
+    try:
+        if razorpay_integration:
+            return jsonify({
+                'success': True,
+                'key_id': razorpay_integration.get_key_id()
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Razorpay integration not configured'
+            })
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+@app.route('/create-razorpay-order', methods=['POST'])
+def create_razorpay_order():
+    """Create a Razorpay order for payment"""
+    try:
+        if not razorpay_integration:
+            return jsonify({
+                'success': False,
+                'message': 'Razorpay integration not configured'
+            })
+        
+        data = request.get_json()
+        amount = data.get('amount')  # Amount in rupees
+        
+        if not amount:
+            return jsonify({'success': False, 'message': 'Amount is required'})
+        
+        # Convert amount to paise (Razorpay uses smallest currency unit)
+        amount_in_paise = int(float(amount) * 100)
+        
+        # Generate receipt ID
+        receipt_id = f"order_{len(orders) + 1}_{int(datetime.now().timestamp())}"
+        
+        # Create order
+        result = razorpay_integration.create_order(
+            amount=amount_in_paise,
+            currency='INR',
+            receipt=receipt_id
+        )
+        
+        if result['success']:
+            return jsonify({
+                'success': True,
+                'order_id': result['order']['id'],
+                'amount': result['order']['amount'],
+                'currency': result['order']['currency']
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': result.get('error', 'Failed to create order')
+            })
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+@app.route('/verify-razorpay-payment', methods=['POST'])
+def verify_razorpay_payment():
+    """Verify Razorpay payment signature"""
+    try:
+        if not razorpay_integration:
+            return jsonify({
+                'success': False,
+                'message': 'Razorpay integration not configured'
+            })
+        
+        data = request.get_json()
+        order_id = data.get('razorpay_order_id')
+        payment_id = data.get('razorpay_payment_id')
+        signature = data.get('razorpay_signature')
+        
+        if not all([order_id, payment_id, signature]):
+            return jsonify({
+                'success': False,
+                'message': 'Missing payment verification parameters'
+            })
+        
+        # Verify payment signature
+        is_valid = razorpay_integration.verify_payment_signature(
+            order_id=order_id,
+            payment_id=payment_id,
+            signature=signature
+        )
+        
+        if is_valid:
+            # Payment verified successfully
+            # Here you can update order status, send confirmation email, etc.
+            return jsonify({
+                'success': True,
+                'message': 'Payment verified successfully',
+                'payment_id': payment_id
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Payment verification failed'
+            })
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+@app.route('/razorpay-webhook', methods=['POST'])
+def razorpay_webhook():
+    """Handle Razorpay webhook notifications"""
+    try:
+        # Get webhook data
+        webhook_data = request.get_json()
+        
+        # Log webhook event
+        event = webhook_data.get('event')
+        payload = webhook_data.get('payload')
+        
+        # Handle different webhook events
+        if event == 'payment.captured':
+            # Payment was captured successfully
+            payment_id = payload.get('payment', {}).get('entity', {}).get('id')
+            order_id = payload.get('payment', {}).get('entity', {}).get('order_id')
+            
+            # Update order status in database
+            # This is where you would update your order records
+            
+            return jsonify({'success': True, 'message': 'Payment captured'})
+        
+        elif event == 'payment.failed':
+            # Payment failed
+            payment_id = payload.get('payment', {}).get('entity', {}).get('id')
+            
+            # Update order status to failed
+            # This is where you would update your order records
+            
+            return jsonify({'success': True, 'message': 'Payment failed recorded'})
+        
+        else:
+            # Unknown event
+            return jsonify({'success': True, 'message': f'Received event: {event}'})
+    
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 400
