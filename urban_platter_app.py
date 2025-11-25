@@ -1120,4 +1120,5 @@ if __name__ == '__main__':
     with app.app_context():
         init_db()
     print(f"🚀 {RESTAURANT_NAME} Management System starting...")
-    print("📱 Access at: http://localhost:5000")    app.run(debug=True, host='0.0.0.0', port=5000)
+        print("📱 Access at: http://localhost:5000")
+        app.run(debug=True, host='0.0.0.0', port=5000)
