@@ -136,10 +136,6 @@ class Review(db.Model):
     comment = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-# Initialize database on first request
-@app.before_first_request
-def initialize_database():
-        db.create_all()
 
 
 # Helper functions
