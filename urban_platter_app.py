@@ -1122,6 +1122,6 @@ with app.app_context():
     db.create_all()  # Create empty tables on startup
 if __name__ == '__main__':
     with app.app_context():
-        # init_db()  # Commented out - database initialization causes startup delay
-        print("📱 Access at: http://localhost:5000")
+        init_db()
+              print("📱 Access at: http://localhost:5000")
         app.run(debug=True, host='0.0.0.0', port=5000)
