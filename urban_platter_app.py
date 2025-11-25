@@ -752,11 +752,11 @@ def init_db():
         db.session.add(staff)
     
     # Clear existing menu items to avoid duplicates
-    MenuItem.query.delete()
+#     MenuItem.query.delete()
     
     # Urban Platter menu with 60 items - All prices in Indian Rupees (₹)
     urban_platter_menu = [
-    {'category': 'Starters',
+# #     {'category': 'Starters',
  'description': 'Marinated paneer cubes grilled to perfection with aromatic '
                 'spices',
  'image_url': '/static/images/menu/starters/paneer-tikka.jpg',
