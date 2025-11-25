@@ -97,7 +97,6 @@ class Order(db.Model):
     # Relationships
     order_items = db.relationship('OrderItem', backref='order', lazy=True, cascade='all, delete-orphan')
     payment = db.relationship('Payment', backref='order', uselist=False)
-        customer = db.relationship('User', backref='orders', foreign_keys=[customer_id])
 
 class OrderItem(db.Model):
     """Individual items within an order"""
