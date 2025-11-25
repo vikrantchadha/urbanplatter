@@ -1122,12 +1122,12 @@ with app.app_context():
     db.create_all()  # 1122
 
     try:
-    # Initialize database with menu items if empty
+        # Initialize database with menu items if empty
                 if MenuItem.query.count() == 0:
                     init_db()
-                        except Exception as e:
-                                    # Database not ready yet, skip initialization
-                                    pass
+                    except Exception as e:
+                                        # Database not ready yet, skip initialization
+                                            pass
             
 if __name__ == '__main__':
         app.run(debug=True, host='0.0.0.0', port=5000)
