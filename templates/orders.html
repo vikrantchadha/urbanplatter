@@ -108,6 +108,23 @@
                     </div>
                 </div>
 
+                    <!-- Delivery Information -->
+                                {% if order.delivery_address or order.contact_number %}
+                                <hr>
+                                <div class="row mb-3">
+                                                        {% if order.delivery_address %}
+                                                        <div class="col-md-6">
+                                                                                    <p><strong>Delivery Address:</strong><br>{{ order.delivery_address }}</p>
+                                                                                </div>
+                                                        {% endif %}
+                                                        {% if order.contact_number %}
+                                                        <div class="col-md-6">
+                                                                                    <p><strong>Contact Number:</strong><br>{{ order.contact_number }}</p>
+                                                                                </div>
+                                                        {% endif %}
+                                                    </div>
+                                {% endif %}
+
                 <h6 class="text-primary">Items Ordered</h6>
                 <ul class="list-group">
                     {% for item in order.order_items %}
