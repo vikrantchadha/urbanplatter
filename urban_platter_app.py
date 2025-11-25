@@ -625,7 +625,7 @@ def process_payment():
             )
 
                 # Update order with delivery details
-                order.delivery_address = delivery_address
+            order.delivery_address = delivery_address
         order.contact_number = contact_number        
         order.payment_status = 'Paid'
         db.session.add(payment)
