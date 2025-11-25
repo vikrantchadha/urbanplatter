@@ -1135,7 +1135,7 @@ def migrate_database():
     """Add missing columns to existing tables"""
     try:
         # Check if delivery_address column exists
-        with db.engine.connect() as conn:
+        with db.engine.begin() as conn:
             result = conn.execute(db.text(
                 "PRAGMA table_info('order')"
             ))
@@ -1146,7 +1146,6 @@ def migrate_database():
                 conn.execute(db.text(
                     "ALTER TABLE 'order' ADD COLUMN delivery_address TEXT"
                 ))
-                conn.commit()
                 print("✅ Added delivery_address column to Order table")
             
             # Add contact_number if missing
@@ -1154,7 +1153,6 @@ def migrate_database():
                 conn.execute(db.text(
                     "ALTER TABLE 'order' ADD COLUMN contact_number VARCHAR(20)"
                 ))
-                conn.commit()
                 print("✅ Added contact_number column to Order table")
     except Exception as e:
         print(f"⚠️  Migration error: {e}")
