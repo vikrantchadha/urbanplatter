@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Edit Menu Item - Urban Platter{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2><i class="fas fa-edit me-2"></i>Edit Menu Item</h2>
+    <p class="text-muted">Update the details for {{ item.name }}</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card">
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('edit_menu_item', item_id=item.id) }}">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="name" class="form-label">Item Name *</label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ item.name }}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="category" class="form-label">Category *</label>
+                        <select class="form-select" id="category" name="category" required>
+                            <option value="">Select Category</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat }}" {% if item.category == cat %}selected{% endif %}>{{ cat }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="3">{{ item.description or '' }}</textarea>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="price" class="form-label">Price (Rs.) *</label>
+                        <input type="number" class="form-control" id="price" name="price" step="0.01" min="0" value="{{ item.price }}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="image_url" class="form-label">Image URL</label>
+                        <input type="text" class="form-control" id="image_url" name="image_url" value="{{ item.image_url or '' }}" placeholder="/static/images/menu/...">
+                    </div>
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="available" name="available" {% if item.available %}checked{% endif %}>
+                    <label class="form-check-label" for="available">Available for ordering</label>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Update Item</button>
+                    <a href="{{ url_for('admin_menu') }}" class="btn btn-secondary"><i class="fas fa-arrow-left me-2"></i>Back to Menu</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
