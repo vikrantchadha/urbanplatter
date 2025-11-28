@@ -62,14 +62,9 @@ The system supports three user roles:
 - Order queue management for staff
 
 ### 💳 Payment System
-- Multiple payment methods:
+- payment methods:
   - **Cash on Delivery (COD)** - Default payment option
-  - **Card Payment** - Credit/Debit card support
-  - **Online Payment** - Stripe integration (for future scope)
-- Payment status tracking
-- Receipt generation
-- Payment verification
-
+ 
 ### 📅 Table Reservations
 - Online table booking system
 - Date and time selection
