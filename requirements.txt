@@ -1,8 +1,332 @@
-flask==3.0.0
-flask-sqlalchemy==3.1.1
-flask-login==0.6.3
-stripe==7.8.0
-python-dotenv==1.0.0
-werkzeug==3.0.1
-gunicorn==21.2.0
+# ===============================================
+# Urban Platter - Restaurant Management System
+# Python Dependencies & Requirements
+# ===============================================
+# Project: Urban Platter - A comprehensive restaurant management system
+# Purpose: Complete backend and frontend for a modern restaurant with authentication,
+#          menu management, order processing, table reservations, and payment integration
+# Version: 1.0.0
+# Python: 3.8+
+# ===============================================
 
+# ===============================================
+# CORE WEB FRAMEWORK
+# ===============================================
+flask==3.0.0
+# Description: Lightweight and flexible Python web framework for building web applications
+#              Used for routing, request handling, and server-side rendering
+# Purpose: Main web application framework
+
+# ===============================================
+# DATABASE & ORM
+# ===============================================
+flask-sqlalchemy==3.1.1
+# Description: SQLAlchemy ORM integration with Flask for database operations
+#              Supports SQLite, PostgreSQL, MySQL, and other relational databases
+# Purpose: Database abstraction and model management
+# Models: User, MenuItem, Order, OrderItem, Reservation, Payment, Review
+
+# ===============================================
+# AUTHENTICATION & SECURITY
+# ===============================================
+flask-login==0.6.3
+# Description: User session and authentication management for Flask
+#              Handles login/logout, user session management, and access control
+# Purpose: Implements user authentication and role-based access control (RBAC)
+# Roles: Admin, Staff, Customer
+
+werkzeug==3.0.1
+# Description: WSGI utility library with password hashing and security utilities
+#              Provides secure password hashing (bcrypt-compatible)
+# Purpose: Password encryption, hash generation, and security best practices
+# Functions: generate_password_hash(), check_password_hash()
+
+# ===============================================
+# PAYMENT GATEWAY INTEGRATION
+# ===============================================
+stripe==7.8.0
+# Description: Official Stripe SDK for Python for payment processing
+#              Handles online payment transactions, charge creation, and payment verification
+# Purpose: Online payment processing for orders
+# Features: Credit/Debit card payments, payment verification, charge management
+# Note: Requires STRIPE_SECRET_KEY environment variable for production use
+
+# ===============================================
+# ENVIRONMENT & CONFIGURATION MANAGEMENT
+# ===============================================
+python-dotenv==1.0.0
+# Description: Loads environment variables from .env files
+#              Manages sensitive configuration like database credentials, API keys
+# Purpose: Configuration management for different environments (dev, prod, staging)
+# Variables: DATABASE_URL, SECRET_KEY, STRIPE_SECRET_KEY, DEBUG
+
+# ===============================================
+# PRODUCTION WEB SERVER
+# ===============================================
+gunicorn==21.2.0
+# Description: WSGI HTTP Server for production deployment
+#              Used with cloud platforms like AWS Elastic Beanstalk, Heroku, etc.
+# Purpose: Production-ready application server
+# Workers: Configurable worker processes for handling concurrent requests
+# Usage: gunicorn -w 4 -b 0.0.0.0:5000 urban_platter_app:app
+
+# ===============================================
+# PROJECT STRUCTURE
+# ===============================================
+# Root directory structure:
+# ├── urban_platter_app.py       (Main Flask application with all routes and models)
+# ├── application.py               (Elastic Beanstalk entry point)
+# ├── requirements.txt             (This file - Python dependencies)
+# ├── Procfile                     (Heroku/EB deployment configuration)
+# ├── templates/                   (Jinja2 HTML templates)
+# │   ├── base.html               (Base layout template)
+# │   ├── index.html              (Homepage)
+# │   ├── menu.html               (Menu display)
+# │   ├── auth/                   (Authentication templates)
+# │   │   ├── login.html
+# │   │   └── register.html
+# │   ├── customer/               (Customer dashboard templates)
+# │   ├── staff/                  (Staff dashboard templates)
+# │   ├── admin/                  (Admin dashboard & management templates)
+# │   └── orders.html, reservations.html, payment.html, etc.
+# ├── static/                     (Static files)
+# │   ├── css/                    (Bootstrap 5 styles)
+# │   ├── js/                     (JavaScript functionality)
+# │   ├── images/                 (Menu item images, logos)
+# │   └── uploads/                (User-uploaded files)
+# ├── instance/                   (Instance-specific files)
+# └── .env                        (Environment variables - NOT in version control)
+
+# ===============================================
+# INSTALLATION & SETUP GUIDE
+# ===============================================
+# 1. Install Python 3.8 or higher
+# 2. Create virtual environment:
+#    python -m venv venv
+#    source venv/bin/activate  # On Windows: venv\Scripts\activate
+#
+# 3. Install dependencies:
+#    pip install -r requirements.txt
+#
+# 4. Create .env file with environment variables:
+#    SECRET_KEY=your-secret-key-here
+#    DATABASE_URL=sqlite:///urban_platter.db  (or PostgreSQL/MySQL)
+#    STRIPE_SECRET_KEY=sk_test_your_stripe_key
+#    DEBUG=False (for production)
+#
+# 5. Initialize database:
+#    python -c "from urban_platter_app import app, db; app.app_context().push(); db.create_all()"
+#
+# 6. Run development server:
+#    python urban_platter_app.py
+#    OR
+#    flask run
+#
+# 7. Access application:
+#    Local: http://localhost:5000
+#    Demo Credentials:
+#    - Admin: admin@urbanplatter.com / admin123
+#    - Staff: staff@urbanplatter.com / staff123
+
+# ===============================================
+# DEPLOYMENT OPTIONS
+# ===============================================
+# AWS Elastic Beanstalk:
+#   - Configured with Python 3.x platform
+#   - Automatic scaling based on traffic
+#   - RDS integration for database
+#   - Uses Procfile for application startup
+#   - CodePipeline for CI/CD from GitHub
+#
+# Heroku:
+#   - Requires Procfile (included)
+#   - Environment variables set via Heroku Config Vars
+#   - Automatic dyno scaling
+#
+# Local/Docker:
+#   - Docker container with Python base image
+#   - Mount volumes for persistent data
+#   - Expose port 5000 or configurable port
+
+# ===============================================
+# KEY FEATURES & DATABASE MODELS
+# ===============================================
+# 1. USER MANAGEMENT
+#    - Role-based access control (Admin, Staff, Customer)
+#    - Secure password hashing
+#    - User registration and authentication
+#    - Session management
+#
+# 2. MENU MANAGEMENT
+#    - 60+ menu items across 4 categories
+#    - Categories: Starters, Main Course, Desserts, Drinks
+#    - Item availability toggle
+#    - Dynamic pricing in Indian Rupees (₹)
+#
+# 3. ORDER MANAGEMENT
+#    - Cart management
+#    - Order creation and tracking
+#    - Status management: Pending → Preparing → Ready → Served → Completed
+#    - Special instructions support
+#    - Order history for customers
+#
+# 4. PAYMENT SYSTEM
+#    - Multiple payment methods: Cash, Card, Online
+#    - Stripe integration for online payments
+#    - Payment status tracking
+#    - Receipt generation
+#
+# 5. TABLE RESERVATIONS
+#    - Booking system with date/time selection
+#    - Party size validation
+#    - Reservation status management
+#    - Conflict detection
+#
+# 6. ADMIN DASHBOARD
+#    - Real-time analytics
+#    - Sales reports (with CSV export)
+#    - Most ordered items tracking
+#    - Revenue analysis
+#    - Staff and customer management
+#
+# 7. CUSTOMER DASHBOARD
+#    - Order history
+#    - Upcoming reservations
+#    - Account management
+#
+# 8. STAFF DASHBOARD
+#    - Order queue management
+#    - Status updates
+#    - Reservation confirmations
+
+# ===============================================
+# API ENDPOINTS
+# ===============================================
+# Public endpoints:
+#   GET  /                          - Homepage
+#   GET  /menu                      - Menu display
+#   POST /register                  - User registration
+#   POST /login                     - User login
+#   GET  /logout                    - User logout
+#   GET  /api/menu_items            - Menu items API
+#
+# Customer endpoints (require login):
+#   POST /order                     - Place new order
+#   GET  /orders                    - View customer orders
+#   GET  /order-confirmation/<id>   - Order confirmation page
+#   POST /reservations              - Make reservation
+#   GET  /customer/dashboard        - Customer dashboard
+#
+# Staff endpoints (require Staff/Admin role):
+#   POST /orders/<id>/status        - Update order status
+#   GET  /staff/dashboard           - Staff dashboard
+#   POST /reservations/<id>/status  - Update reservation status
+#
+# Admin endpoints (require Admin role):
+#   GET  /admin/dashboard           - Admin dashboard
+#   GET  /admin/menu                - Menu management
+#   POST /admin/menu/add            - Add menu item
+#   POST /admin/menu/edit/<id>      - Edit menu item
+#   GET  /admin/menu/delete/<id>    - Delete menu item
+#   GET  /admin/reservations        - Reservation management
+#   GET  /admin/reports             - Reports page
+#   GET  /admin/reports/sales       - Sales report (JSON/CSV)
+
+# ===============================================
+# DATABASE SCHEMA OVERVIEW
+# ===============================================
+# Tables:
+#   - user (id, username, email, password_hash, role, created_at)
+#   - menu_item (id, name, description, price, category, image_url, available, created_at)
+#   - order (id, customer_id, total_amount, status, order_date, payment_status, special_instructions, delivery_address, contact_number)
+#   - order_item (id, order_id, menu_item_id, quantity, price)
+#   - reservation (id, customer_id, date, time, party_size, status, special_requests, created_at)
+#   - payment (id, order_id, amount, payment_method, payment_date, stripe_payment_id, status)
+#   - review (id, customer_id, menu_item_id, rating, comment, created_at)
+
+# ===============================================
+# ENVIRONMENT VARIABLES REQUIRED
+# ===============================================
+# SECRET_KEY          - Flask secret key for session management (generate using secrets.token_hex())
+# DATABASE_URL        - Database connection string
+#                      Examples:
+#                      - SQLite: sqlite:///urban_platter.db
+#                      - PostgreSQL: postgresql://user:password@localhost/db_name
+#                      - MySQL: mysql://user:password@localhost/db_name
+# STRIPE_SECRET_KEY   - Stripe API secret key for payment processing
+# DEBUG               - Debug mode (True/False) - NEVER True in production
+# FLASK_ENV          - Environment: development, testing, production
+
+# ===============================================
+# TESTING THE APPLICATION
+# ===============================================
+# 1. Register as a customer
+# 2. Login with your credentials
+# 3. Browse menu and add items to cart
+# 4. Place an order
+# 5. Process payment (Cash/Card/Online)
+# 6. View order confirmation
+# 7. Make a table reservation
+# 8. Access customer dashboard
+#
+# Admin Testing:
+# 1. Login as admin@urbanplatter.com / admin123
+# 2. Access admin dashboard for analytics
+# 3. Manage menu items
+# 4. View sales reports
+# 5. Process order statuses
+
+# ===============================================
+# TROUBLESHOOTING
+# ===============================================
+# Issue: "No module named 'flask'"
+# Solution: Activate virtual environment and run: pip install -r requirements.txt
+#
+# Issue: "Database locked"
+# Solution: Use PostgreSQL for concurrent access instead of SQLite
+#
+# Issue: "Stripe payment fails"
+# Solution: Verify STRIPE_SECRET_KEY in .env file
+#
+# Issue: "Images not loading"
+# Solution: Ensure static/images directory exists with menu item images
+#
+# Issue: "Server errors in production"
+# Solution: Check logs in Elastic Beanstalk console or server logs
+
+# ===============================================
+# SECURITY BEST PRACTICES
+# ===============================================
+# 1. Never commit .env file or secrets to version control
+# 2. Use environment variables for sensitive data
+# 3. Set DEBUG=False in production
+# 4. Use HTTPS in production
+# 5. Implement rate limiting for API endpoints
+# 6. Validate all user inputs
+# 7. Use parameterized queries (SQLAlchemy does this)
+# 8. Keep dependencies updated
+# 9. Use strong SECRET_KEY (generate with: python -c "import secrets; print(secrets.token_hex(32))")
+# 10. Implement CORS properly if accessed from multiple domains
+
+# ===============================================
+# MAINTENANCE & UPDATES
+# ===============================================
+# Check for dependency updates:
+#   pip list --outdated
+#
+# Update all packages:
+#   pip install --upgrade -r requirements.txt
+#
+# Update specific package:
+#   pip install --upgrade flask
+#
+# Generate updated requirements.txt:
+#   pip freeze > requirements.txt
+
+# ===============================================
+# CONTACT & SUPPORT
+# ===============================================
+# Project: Urban Platter - Restaurant Management System
+# For issues, feature requests, or contributions:
+# GitHub: https://github.com/vikrantchadha/urbanplatter
+# ===============================================
