@@ -26,7 +26,7 @@
 
 ## 🎯 Overview
 
-Urban Platter is a comprehensive **Restaurant Management System** built with Flask, SQLAlchemy, and Bootstrap. It provides a complete solution for managing a modern restaurant with authentication, menu management, online ordering, table reservations, and payment integration.
+Urban Platter is a comprehensive **Restaurant Management System** built with Flask, SQLAlchemy, and Bootstrap. It provides a complete solution for managing a modern restaurant with authentication, menu management, online ordering, table reservations.
 
 The system supports three user roles:
 - **Admin** - Full control over system, analytics, and management
@@ -64,7 +64,8 @@ The system supports three user roles:
 ### 💳 Payment System
 - payment methods:
   - **Cash on Delivery (COD)** - Default payment option
- 
+  -
+
 ### 📅 Table Reservations
 - Online table booking system
 - Date and time selection
@@ -104,7 +105,6 @@ The system supports three user roles:
 - **Authentication:** Flask-Login 0.6.3
 - **Security:** Werkzeug 3.0.1
 - **Database:** SQLite (development) / PostgreSQL (production)
-- **Payment:** Stripe 7.8.0
 - **Server:** Gunicorn 21.2.0 (production)
 - **Config Management:** python-dotenv 1.0.0
 
@@ -163,7 +163,6 @@ DATABASE_URL=sqlite:///urban_platter.db
 # For PostgreSQL:
 # DATABASE_URL=postgresql://user:password@localhost/urbanplatter
 
-# Stripe API Key (for payment processing)
 STRIPE_SECRET_KEY=sk_test_your_stripe_key
 
 # Debug mode (Never True in production!)
